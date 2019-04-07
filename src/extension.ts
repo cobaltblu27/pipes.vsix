@@ -30,25 +30,54 @@ SOFTWARE.
 
 import * as vscode from "vscode";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
+  const config = vscode.workspace.getConfiguration("pipes-vsix");
+  const pipeType = config["sets"][config["pipe-type"]];
+  const frameRate = config["framerate"];
+  const straightProbability = config["going-straight-probability"];
+
+  const message = vscode.window.showInformationMessage;
+
   console.log('Congratulations, your extension "pipes-vsix" is now active!');
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  const pipes = vscode.commands.registerCommand("pipes-vsix.pipes", () => {
-    // The code you place here will be executed every time your command is executed
+  const docInit = async (content?: string) => {
+    return vscode.workspace
+      .openTextDocument({
+        language: "text"
+      })
+      .then(doc => vscode.window.showTextDocument(doc))
+      .then(editor => {
+        if (content) {
+          editor!.edit(editorEdit => {
+            editorEdit.replace(editor!.visibleRanges[0], content);
+            console.log(editor!.visibleRanges);
+          });
+        }
+        return editor;
+      });
+  };
 
-    // Display a message box to the user
+  const getNextPipe = ([]) => {
+    //TODO
+  };
+
+  const render = (content: string, editor: vscode.TextEditor) => {
+    editor.edit(editorEdit => {
+      editorEdit.replace(editor!.visibleRanges[0], content);
+      console.log(editor!.visibleRanges);
+    });
+  };
+
+  const pipes = async () => {
     vscode.window.showInformationMessage("Hello World!");
-  });
-
-  context.subscriptions.push(pipes);
+    let editor = await docInit("1\n2\n3");
+    setTimeout(() => {
+      render("1\n2\n3\n4\n5\n6", editor);
+    }, 1000);
+  };
+  context.subscriptions.push(
+    vscode.commands.registerCommand("pipes-vsix.pipes", pipes)
+  );
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}
